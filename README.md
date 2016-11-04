@@ -1,103 +1,29 @@
-PouchDB Plugin Seed
+Thrifty Sync for PouchDB
 =====
 
-[![Build Status](https://travis-ci.org/pouchdb/plugin-seed.svg)](https://travis-ci.org/pouchdb/plugin-seed)
+This PouchDB plugin aims at improving the performance of synchronization with a remote database.
 
-Fork this project to build your first PouchDB plugin.  It contains everything you need to test in Node, WebSQL, and IndexedDB.  It also includes a Travis config file so you
-can automatically run the tests in Travis.
+**It is still in an early stage of development, use it at own risk!
+Also, please notice that this plugin is not suited for all scenarios (see below).**
 
-Building
-----
-    npm install
-    npm run build
-
-Your plugin is now located at `dist/pouchdb.mypluginname.js` and `dist/pouchdb.mypluginname.min.js` and is ready for distribution.
-
-Getting Started
--------
-
-**First**, change the `name` in `package.json` to whatever you want to call your plugin.  Change the `build` script so that it writes to the desired filename (e.g. `pouchdb.mypluginname.js`).  Also, change the authors, description, git repo, etc.
-
-**Next**, modify the `index.js` to do whatever you want your plugin to do.  Right now it just adds a `pouch.sayHello()` function that says hello:
-
-```js
-exports.sayHello = utils.toPromise(function (callback) {
-  callback(null, 'hello');
-});
-```
-
-**Optionally**, you can add some tests in `tests/test.js`. These tests will be run both in the local database and a remote CouchDB, which is expected to be running at localhost:5984 in "Admin party" mode.
-
-The sample test is:
-
-```js
-
-it('should say hello', function () {
-  return db.sayHello().then(function (response) {
-    response.should.equal('hello');
-  });
-});
-```
-
-Testing
+What does this plugin do?
 ----
 
-### In Node
+Mainly it tries to minimize the number of requests a remote database during two-way sync.
+- The standard PouchDB two-way synchronization isn't but two one-way replications that don't interact with each other. This leads to unnecessary \_revs_diff requests that this plugin avoids.
+- This plugin uses a custom checkpointer that saves synchronization checkpoints only to the local database, thus reducing the number of requests. However, this makes it impossible to detect if the remote database was recreated in the meantime.
 
-This will run the tests in Node using LevelDB:
+When should I use it?
+----
+This plugin can be used if you are performing a two-way synchronization from PouchDB to a remote database of which you know that it will never get recreated (thrifty sync is not able to detect a newly created database, thus potentially leading to missing documents in the remote database).
 
-    npm test
-    
-You can also check for 100% code coverage using:
+Usage
+----
+Just replace `sync` with `thriftySync`:
 
-    npm run coverage
+    import PouchDBThrifty from 'pouchdb-thrifty';
 
-If you don't like the coverage results, change the values from 100 to something else in `package.json`, or add `/*istanbul ignore */` comments.
+    PouchDB.plugin(PouchDBThrifty);
 
-
-If you have mocha installed globally you can run single test with:
-```
-TEST_DB=local mocha --reporter spec --grep search_phrase
-```
-
-The `TEST_DB` environment variable specifies the database that PouchDB should use (see `package.json`).
-
-### In the browser
-
-Run `npm run dev` and then point your favorite browser to [http://127.0.0.1:8001/test/index.html](http://127.0.0.1:8001/test/index.html).
-
-The query param `?grep=mysearch` will search for tests matching `mysearch`.
-
-### Automated browser tests
-
-You can run e.g.
-
-    CLIENT=selenium:firefox npm test
-    CLIENT=selenium:phantomjs npm test
-
-This will run the tests automatically and the process will exit with a 0 or a 1 when it's done. Firefox uses IndexedDB, and PhantomJS uses WebSQL.
-
-What to tell your users
---------
-
-Below is some boilerplate you can use for when you want a real README for your users.
-
-To use this plugin, include it after `pouchdb.js` in your HTML page:
-
-```html
-<script src="pouchdb.js"></script>
-<script src="pouchdb.mypluginname.js"></script>
-```
-
-Or to use it in Node.js, just npm install it:
-
-```
-npm install pouchdb-myplugin
-```
-
-And then attach it to the `PouchDB` object:
-
-```js
-var PouchDB = require('pouchdb');
-PouchDB.plugin(require('pouchdb-myplugin'));
-```
+    var localDB = new PouchDB('foo');
+    localDB.thriftySync(remoteDB, options, callback);
