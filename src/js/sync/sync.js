@@ -6,7 +6,6 @@ import { EventEmitter as EE } from 'events';
 import { clone } from 'pouchdb-utils';
 inherits(Sync, EE);
 export function sync(src, target, opts, callback) {
-    console.debug('INSYNC');
     if (typeof opts === 'function') {
         callback = opts;
         opts = {};
@@ -17,7 +16,6 @@ export function sync(src, target, opts, callback) {
     opts = clone(opts);
     /*jshint validthis:true */
     opts.PouchConstructor = opts.PouchConstructor || this;
-    console.debug('pC', opts.PouchConstructor);
     src = toPouch(src, opts);
     target = toPouch(target, opts);
     return new Sync(src, target, opts, callback);

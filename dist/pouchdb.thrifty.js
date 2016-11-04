@@ -4473,7 +4473,6 @@ function replicateWrapper(src, target, opts, callback) {
 
 inherits_browser$2(Sync, EventEmitter);
 function sync(src, target, opts, callback) {
-    console.debug('INSYNC');
     if (typeof opts === 'function') {
         callback = opts;
         opts = {};
@@ -4484,7 +4483,6 @@ function sync(src, target, opts, callback) {
     opts = clone(opts);
     /*jshint validthis:true */
     opts.PouchConstructor = opts.PouchConstructor || this;
-    console.debug('pC', opts.PouchConstructor);
     src = toPouch(src, opts);
     target = toPouch(target, opts);
     return new Sync(src, target, opts, callback);
@@ -4769,30 +4767,20 @@ function clearStorage(seq) {
 }
 function thriftySync(src, target, options, callback) {
     if (options === void 0) { options = {}; }
-    console.debug('thriftySync', src, target, options, callback);
-    try {
-        options.push = options.push || {};
-        var oldFilter_1 = options.push.filter || (function () { return true; });
-        options.push.filter = function (doc) { return oldFilter_1(doc) && filterPush(doc); };
-        /*console.debug('CONSTR2', constr);
-        options.PouchConstructor = constr;*/
-        var handle = sync(src, target, options, callback), last_seq_1 = 0;
-        console.debug('FOO', handle);
-        handle.on('change', function (change) {
-            console.debug('CHANGE', change);
-            if (change.direction == 'pull') {
-                addDocsToStore(change.change.docs, last_seq_1);
-            }
-            else if (change.direction == 'push') {
-                last_seq_1 = change.change.last_seq;
-                clearStorage(last_seq_1);
-            }
-        });
-        return handle;
-    }
-    catch (e) {
-        console.error('ASDA', e);
-    }
+    options.push = options.push || {};
+    var oldFilter = options.push.filter || (function () { return true; });
+    options.push.filter = function (doc) { return oldFilter(doc) && filterPush(doc); };
+    var handle = sync(src, target, options, callback), last_seq = 0;
+    handle.on('change', function (change) {
+        if (change.direction == 'pull') {
+            addDocsToStore(change.change.docs, last_seq);
+        }
+        else if (change.direction == 'push') {
+            last_seq = change.change.last_seq;
+            clearStorage(last_seq);
+        }
+    });
+    return handle;
 }
 
 var Mutation$2 = commonjsGlobal.MutationObserver || commonjsGlobal.WebKitMutationObserver;
@@ -5254,9 +5242,7 @@ var PouchDBUpsert = Object.freeze({
 	upsert: upsert$2
 });
 
-console.debug('UPS', PouchDBUpsert);
 function plugin(PouchDB) {
-    console.debug('INITP', PouchDB, thriftySync);
     PouchDB.plugin(PouchDBUpsert);
     initStore(PouchDB);
     PouchDB.thriftySync = thriftySync;
