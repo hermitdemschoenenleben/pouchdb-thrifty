@@ -3,7 +3,8 @@ import * as PouchDBUpsert from 'pouchdb-upsert';
 
 export default function plugin(PouchDB) {
   PouchDB.plugin(PouchDBUpsert);
-  initStore(PouchDB);
+
+  initStore();
 
   PouchDB.thriftySync = thriftySync;
 

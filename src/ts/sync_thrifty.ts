@@ -1,6 +1,8 @@
 import {getXHR, setXHROption} from './xhr';
 import {sync} from './sync/sync';
 
+var CACHE_KEY = '_pouchdb_thrifty_store';
+
 function updateAdapter(PouchDB, name, transformer: Function) {
   PouchDB.adapters[name] = transformer(PouchDB.adapters[name])
   PouchDB.adapters[name].valid = () => true;
@@ -8,23 +10,13 @@ function updateAdapter(PouchDB, name, transformer: Function) {
 
 // TODO: Multiple DBs
 var store = {};
-var db;
 
-export async function initStore(PouchDB) {
-  db = new PouchDB('sync_optimization', {
-    auto_compaction: true,
-    revs_limit: 10
-  });
-  try {
-    store = (await db.get('store')).data;
-  } catch(e) {}
+export function initStore() {
+  store = window.localStorage.getItem(CACHE_KEY);
 }
 
 function writeStore() {
-  db.upsert('store', doc => {
-    doc.data = store;
-    return doc;
-  });
+  window.localStorage.setItem(CACHE_KEY, JSON.stringify(store));
 }
 
 function docToKey(doc) {

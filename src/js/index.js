@@ -2,7 +2,7 @@ import { thriftySync, initStore } from './sync_thrifty';
 import * as PouchDBUpsert from 'pouchdb-upsert';
 export default function plugin(PouchDB) {
     PouchDB.plugin(PouchDBUpsert);
-    initStore(PouchDB);
+    initStore();
     PouchDB.thriftySync = thriftySync;
     PouchDB.prototype.thriftySync = function (dbName, opts, callback) {
         opts = opts || {};
