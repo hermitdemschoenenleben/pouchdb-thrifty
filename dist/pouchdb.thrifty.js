@@ -4670,14 +4670,13 @@ Sync.prototype.cancel = function () {
     }
 };
 
-var CACHE_KEY = '_pouchdb_thrifty_store';
 // TODO: Multiple DBs
 var store = {};
 function initStore() {
-    store = window.localStorage.getItem(CACHE_KEY);
+    //store = window.localStorage.getItem(CACHE_KEY);
 }
 function writeStore() {
-    window.localStorage.setItem(CACHE_KEY, JSON.stringify(store));
+    //window.localStorage.setItem(CACHE_KEY, JSON.stringify(store));
 }
 function docToKey(doc) {
     return JSON.stringify([doc._id, doc._rev]);

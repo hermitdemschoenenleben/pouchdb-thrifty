@@ -7,10 +7,10 @@ function updateAdapter(PouchDB, name, transformer) {
 // TODO: Multiple DBs
 var store = {};
 export function initStore() {
-    store = window.localStorage.getItem(CACHE_KEY);
+    //store = window.localStorage.getItem(CACHE_KEY);
 }
 function writeStore() {
-    window.localStorage.setItem(CACHE_KEY, JSON.stringify(store));
+    //window.localStorage.setItem(CACHE_KEY, JSON.stringify(store));
 }
 function docToKey(doc) {
     return JSON.stringify([doc._id, doc._rev]);
