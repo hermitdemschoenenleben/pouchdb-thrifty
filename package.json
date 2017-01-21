@@ -34,7 +34,8 @@
     "inherits": "^2.0.3",
     "pouchdb-errors": "^6.0.7",
     "pouchdb-generate-replication-id": "^6.0.7",
-    "pouchdb-promise": "^6.0.7"
+    "pouchdb-promise": "^6.0.7",
+    "pouchdb-utils": "^6.1.0"
   },
   "devDependencies": {
     "bluebird": "^3.4.0",

@@ -4,6 +4,7 @@ import { replicate, toPouch } from './replicateWrapper';
 import inherits from 'inherits';
 import { EventEmitter as EE } from 'events';
 import { clone } from 'pouchdb-utils';
+
 inherits(Sync, EE);
 export function sync(src, target, opts, callback) {
     if (typeof opts === 'function') {
