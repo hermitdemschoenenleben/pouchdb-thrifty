@@ -1,11 +1,6 @@
-import {thriftySync, initStore} from './sync_thrifty';
-import * as PouchDBUpsert from 'pouchdb-upsert';
+import {thriftySync} from './sync_thrifty';
 
 export default function plugin(PouchDB) {
-  PouchDB.plugin(PouchDBUpsert);
-
-  initStore();
-
   PouchDB.thriftySync = thriftySync;
 
   PouchDB.prototype.thriftySync = function (dbName, opts, callback) {
@@ -14,9 +9,6 @@ export default function plugin(PouchDB) {
     return this.constructor.thriftySync(this, dbName, opts, callback);
   };
 }
-
-
-declare var window;
 
 /* istanbul ignore next */
 if (typeof window !== 'undefined' && window.PouchDB) {

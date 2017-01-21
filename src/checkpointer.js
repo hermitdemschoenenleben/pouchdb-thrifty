@@ -13,6 +13,7 @@ function getLocalDB(db1, db2) {
 
 export default function Checkpointer(src, target, id, returnValue) {
   this.db = getLocalDB(src, target);
+  this.remoteDB = (src == this.db) ? target : src;
   this.id = id;
   this.returnValue = returnValue;
 }
@@ -56,11 +57,11 @@ Checkpointer.prototype.writeCheckpoint = function (checkpoint, session) {
   return updateCheckpoint(this.db, this.id, checkpoint, session, this.returnValue);
 };
 
-Checkpointer.prototype.getCheckpoint = function () {
-  var self = this;
-  return self.db.get(self.id).then(function (doc) {
-    return doc.last_seq;
-  }).catch(function(err) {
+Checkpointer.prototype.getCheckpoint = async function () {
+  var self = this, localDoc;
+  try {
+    localDoc = await self.db.get(self.id);
+  } catch(err) {
     if (err.status === 404) {
       return self.db.put({
         _id: self.id,
@@ -71,7 +72,29 @@ Checkpointer.prototype.getCheckpoint = function () {
     } else {
       throw err;
     }
-  }).then(function(result) {
-    return result;
-  });
+  }
+
+  /*
+  Sync calls getCheckpoint in the beginning. Normally, this fetches a document
+  containing the last revision from the remote server. If connection to the
+  remote server does not succeed, this throws an error that is caught afterwards
+  and a backoff is started.
+
+  However, thriftySync does not use a remote document. Therefore, if there's
+  no connection, this remains unknown and an error occurs later inside
+  PouchDB that is not well caught --> the backoff is not working properly and
+  the server is spammed.
+
+  In order to prevent this, we make one call to a non-existing document on the
+  remote server which tests the connection. If this fails, we throw an error
+  in order to enable the backoffed retries.
+  */
+  try {
+    await self.remoteDB.get('thisisadocumentthatshouldneverexist');
+  } catch(err) {
+    if (err.status !== 404) {
+      throw err;
+    }
+  }
+  return localDoc.last_seq;
 };

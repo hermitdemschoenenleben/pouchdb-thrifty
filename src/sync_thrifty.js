@@ -3,21 +3,12 @@ import {sync} from './sync/sync';
 
 var CACHE_KEY = '_pouchdb_thrifty_store';
 
-function updateAdapter(PouchDB, name, transformer: Function) {
+function updateAdapter(PouchDB, name, transformer) {
   PouchDB.adapters[name] = transformer(PouchDB.adapters[name])
   PouchDB.adapters[name].valid = () => true;
 }
 
-// TODO: Multiple DBs
 var store = {};
-
-export function initStore() {
-  //store = window.localStorage.getItem(CACHE_KEY);
-}
-
-function writeStore() {
-  //window.localStorage.setItem(CACHE_KEY, JSON.stringify(store));
-}
 
 function docToKey(doc) {
   return JSON.stringify([doc._id, doc._rev]);
@@ -34,7 +25,6 @@ function addDocsToStore(docs, seq) {
   for (let doc of docs) {
     store[docToKey(doc)] = seq;
   }
-  writeStore();
 }
 
 function clearStorage(seq) {
@@ -44,16 +34,15 @@ function clearStorage(seq) {
         delete store[key];
       }
     }
-    writeStore();
   }, 2000);
 }
 
-export function thriftySync(src, target, options: any={}, callback) {
+export function thriftySync(src, target, options={}, callback) {
   options.push = options.push || {};
   let oldFilter = options.push.filter || (() => true);
   options.push.filter = doc => oldFilter(doc) && filterPush(doc);
 
-  let handle = <any>sync(src, target, options, callback),
+  let handle = sync(src, target, options, callback),
       last_seq = 0;
 
   handle.on('change', change => {

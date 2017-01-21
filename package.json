@@ -2,7 +2,7 @@
   "name": "pouchdb-thrifty",
   "version": "0.0.1",
   "description": "Optimize synchronization to a remote database by minimizing the number of requests",
-  "main": "src/js/index.js",
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/hermitdemschoenenleben/pouchdb-thrifty.git"
@@ -23,7 +23,7 @@
     "test-browser": "./bin/test-browser.js",
     "jshint": "jshint -c .jshintrc *.js test/test.js",
     "test": "npm run jshint && ./bin/run-test.sh",
-    "build": "mkdirp dist && mkdirp src/js && tsc && npm run rollup",
+    "build": "mkdirp dist && npm run rollup",
     "rollup": "rollup -c rollup-config.js > dist/pouchdb.thrifty.js",
     "dev": "rollup test/test.js > test/test-bundle.js && npm run dev-server",
     "dev-server": "./bin/dev-server.js",
@@ -32,10 +32,11 @@
   "dependencies": {
     "events": "^1.1.1",
     "inherits": "^2.0.3",
-    "pouchdb-errors": "^6.0.7",
-    "pouchdb-generate-replication-id": "^6.0.7",
-    "pouchdb-promise": "^6.0.7",
-    "pouchdb-utils": "^6.1.0"
+    "pouchdb-checkpointer": "^6.1.1",
+    "pouchdb-errors": "^6.1.1",
+    "pouchdb-generate-replication-id": "^6.1.1",
+    "pouchdb-promise": "^6.1.1",
+    "pouchdb-utils": "^6.1.1"
   },
   "devDependencies": {
     "bluebird": "^3.4.0",
@@ -56,7 +57,6 @@
     "rollup-plugin-node-resolve": "^2.0.0",
     "sauce-connect-launcher": "^0.4.2",
     "selenium-standalone": "^5.0.0",
-    "typescript": "^2.1.0-dev.20161103",
     "uglify-js": "^2.4.13",
     "watchify": "^3.1.0",
     "wd": "^0.2.21"

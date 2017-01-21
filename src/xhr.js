@@ -4,6 +4,7 @@ var EVENTS = ['loadstart','progress','abort','error','load','timeout','loadend']
     METHODS = ['setRequestHeader','send','abort','getResponseHeader','getAllResponseHeaders',
                'overrideMimeType', 'addEventListener', 'removeEventListener', 'open'];
 
+/*
 export interface XHRData {
  data?: string | {},
  error?: string,
@@ -11,15 +12,15 @@ export interface XHRData {
  headers?: {
    [keys: string]: string
  }
-}
+}*/
 
-export function setXHROption(options: any={}, xhr) {
+export function setXHROption(options={}, xhr) {
   options.ajax = options.ajax || {};
   options.ajax.xhr = xhr;
   return options;
 }
 
-function _apply(wrapper, fct: Function) {
+function _apply(wrapper, fct) {
   var ret = [];
   if (wrapper._use_native) {
     ret.push(fct(wrapper._native));
@@ -37,7 +38,7 @@ function proxyMethod(methodName) {
 }
 
 function proxyProperty(_this, propertyName, writable=undefined) {
-  var descriptor: any = {
+  var descriptor = {
     configurable: true,
     get: () => _apply(_this, xhr => xhr[propertyName])
   };
@@ -60,19 +61,19 @@ function proxyEventProperty(_this, eventName) {
 }
 
 class ProxyXHR {
-  url: string;
-  method: string;
-  headers = {};
-  onload: Function = function() {};
-  onerror: Function = function() {};
-  onreadystatechange: Function = function() {};
-  readyState = XMLHttpRequest.UNSENT;
-  status: number = 0;
-  listeners = {};
-  raw_data: any;
-  responseText: any;
-
   constructor() {
+    this.url = undefined; // string;
+    this.method = undefined // string;
+    this.headers = {};
+    this.onload = function() {};
+    this.onerror = function() {};
+    this.onreadystatechange = function() {};
+    this.readyState = XMLHttpRequest.UNSENT;
+    this.status = 0;
+    this.listeners = {};
+    this.raw_data = undefined;
+    this.responseText = undefined;
+
     for (let event of EVENTS) {
       this.listeners[event] = [];
       this['on' + event] = function() {}
@@ -91,7 +92,7 @@ class ProxyXHR {
     this.listeners[eventName].push(handler);
   }
 
-  setReadyState(state: number) {
+  setReadyState(state) {
     this.readyState = state;
     this.onreadystatechange();
   }
@@ -106,7 +107,7 @@ class ProxyXHR {
     }
   }
 
-  success(data: XHRData) {
+  success(data) {
     console.info('recieved xhr wrapper request', this);
     this.raw_data = data;
     this.status = data.status;
@@ -116,7 +117,7 @@ class ProxyXHR {
     this._callListeners('load');
   }
 
-  error(data: XHRData) {
+  error(data) {
     this.status = data.status;
     this.responseText = data.error;
     this.setReadyState(XMLHttpRequest.DONE)

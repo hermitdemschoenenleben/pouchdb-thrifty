@@ -4,7 +4,7 @@ import nodeResolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 
 export default {
-  entry: 'src/js/index.js',
+  entry: 'src/index.js',
   plugins: [
     nodeResolve({
       // use "module" field for ES6 module if possible
