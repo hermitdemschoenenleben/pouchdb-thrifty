@@ -57,44 +57,47 @@ Checkpointer.prototype.writeCheckpoint = function (checkpoint, session) {
   return updateCheckpoint(this.db, this.id, checkpoint, session, this.returnValue);
 };
 
-Checkpointer.prototype.getCheckpoint = async function () {
-  var self = this, localDoc;
-  try {
-    localDoc = await self.db.get(self.id);
-  } catch(err) {
-    if (err.status === 404) {
-      return self.db.put({
-        _id: self.id,
-        last_seq: LOWEST_SEQ
-      }).then(function () {
-        return LOWEST_SEQ;
-      })
-    } else {
-      throw err;
-    }
-  }
+Checkpointer.prototype.getCheckpoint = function () {
+  let lastSeq;
 
-  /*
-  Sync calls getCheckpoint in the beginning. Normally, this fetches a document
-  containing the last revision from the remote server. If connection to the
-  remote server does not succeed, this throws an error that is caught afterwards
-  and a backoff is started.
+  return this.db.get(this.id)
+    .then(localDoc => localDoc.last_seq)
+    .catch(err => {
+      if (err.status === 404) {
+        return this.db.put({
+          _id: this.id,
+          last_seq: LOWEST_SEQ
+        }).then(function () {
+          return LOWEST_SEQ;
+        })
+      } else {
+        throw err;
+      }
+    })
+    .then(value => {
+      lastSeq = value;
 
-  However, thriftySync does not use a remote document. Therefore, if there's
-  no connection, this remains unknown and an error occurs later inside
-  PouchDB that is not well caught --> the backoff is not working properly and
-  the server is spammed.
+      /*
+      Sync calls getCheckpoint in the beginning. Normally, this fetches a document
+      containing the last revision from the remote server. If connection to the
+      remote server does not succeed, this throws an error that is caught afterwards
+      and a backoff is started.
 
-  In order to prevent this, we make one call to a non-existing document on the
-  remote server which tests the connection. If this fails, we throw an error
-  in order to enable the backoffed retries.
-  */
-  try {
-    await self.remoteDB.get('thisisadocumentthatshouldneverexist');
-  } catch(err) {
-    if (err.status !== 404) {
-      throw err;
-    }
-  }
-  return localDoc.last_seq;
+      However, thriftySync does not use a remote document. Therefore, if there's
+      no connection, this remains unknown and an error occurs later inside
+      PouchDB that is not well caught --> the backoff is not working properly and
+      the server is spammed.
+
+      In order to prevent this, we make one call to a non-existing document on the
+      remote server which tests the connection. If this fails, we throw an error
+      in order to enable the backoffed retries.
+      */
+
+      return this.remoteDB.get('thisisadocumentthatshouldneverexist');
+    }).catch(err => {
+      if (err.status !== 404) {
+        throw err;
+      }
+    })
+    .then(_ => lastSeq)
 };
