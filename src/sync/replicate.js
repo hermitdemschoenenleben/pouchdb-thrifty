@@ -381,7 +381,7 @@ function replicate(src, target, opts, returnValue, result) {
           since: last_seq,
           limit: batch_size,
           batch_size: batch_size,
-          style: 'all_docs',
+          style: 'main_only', // XXX CHANGED!!!
           doc_ids: doc_ids,
           return_docs: true // required so we know when we're done
         };

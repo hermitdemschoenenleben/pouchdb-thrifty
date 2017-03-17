@@ -1,12 +1,4 @@
-import {getXHR, setXHROption} from './xhr';
 import {sync} from './sync/sync';
-
-var CACHE_KEY = '_pouchdb_thrifty_store';
-
-function updateAdapter(PouchDB, name, transformer) {
-  PouchDB.adapters[name] = transformer(PouchDB.adapters[name])
-  PouchDB.adapters[name].valid = () => true;
-}
 
 var store = {};
 
