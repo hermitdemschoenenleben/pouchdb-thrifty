@@ -1,6 +1,5 @@
 import PouchDB from 'pouchdb';
 
-console.debug('!!!', PouchDB);
 var store = {};
 
 function docToKey(doc) {
