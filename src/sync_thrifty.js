@@ -1,5 +1,6 @@
-import {sync} from './sync/sync';
+import PouchDB from 'pouchdb';
 
+console.debug('!!!', PouchDB);
 var store = {};
 
 function docToKey(doc) {
@@ -34,7 +35,7 @@ export function thriftySync(src, target, options={}, callback) {
   let oldFilter = options.push.filter || (() => true);
   options.push.filter = doc => oldFilter(doc) && filterPush(doc);
 
-  let handle = sync(src, target, options, callback),
+  let handle = PouchDB.sync(src, target, options, callback),
       last_seq = 0;
 
   handle.on('change', change => {

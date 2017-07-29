@@ -11,7 +11,6 @@ What does this plugin do?
 
 Mainly it tries to minimize the number of requests a remote database during two-way sync.
 - The standard PouchDB two-way synchronization isn't but two one-way replications that don't interact with each other. This leads to unnecessary \_revs_diff requests that this plugin avoids.
-- This plugin uses a custom checkpointer that saves synchronization checkpoints only to the local database, thus reducing the number of requests. However, this makes it impossible to detect if the remote database was recreated in the meantime.
 
 When should I use it?
 ----
