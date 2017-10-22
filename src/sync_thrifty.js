@@ -29,21 +29,44 @@ function clearStorage(seq) {
   }, 2000);
 }
 
-export function thriftySync(src, target, options={}, callback) {
+export function thriftySync(source, target, options={}) {
   options.push = options.push || {};
   let oldFilter = options.push.filter || (() => true);
   options.push.filter = doc => oldFilter(doc) && filterPush(doc);
 
-  let handle = PouchDB.sync(src, target, options, callback),
-      last_seq = 0;
+  let pullOptions = options.pull,
+      pushOptions = options.push;
 
-  handle.on('change', change => {
-    if (change.direction == 'pull') {
-      addDocsToStore(change.change.docs, last_seq);
-    } else if (change.direction == 'push') {
-      last_seq = change.change.last_seq;
-      clearStorage(last_seq);
+  delete options.pull;
+  delete options.push;
+
+  pullOptions = Object.assign({}, pullOptions, options);
+  pushOptions = Object.assign({}, pushOptions, options);
+
+  let pushHandle = PouchDB.replicate(source, target, pushOptions),
+      pullHandle = PouchDB.replicate(target, source, pullOptions);
+
+  let last_seq = 0;
+
+  pullHandle = pullHandle.on('change', change => {
+    try {
+      addDocsToStore(change.docs, last_seq);
+    } catch(e) {
+      console.error(e);
     }
   });
-  return handle;
+
+  pushHandle = pushHandle.on('change', change => {
+    try {
+      last_seq = change.last_seq;
+      clearStorage(last_seq);
+    } catch(e) {
+      console.error(e);
+    }
+  });
+
+  return {
+    pull: pullHandle,
+    push: pushHandle
+  };
 }
