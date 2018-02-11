@@ -20,7 +20,7 @@ function addDocsToStore(docs, seq) {
 }
 
 function clearStorage(seq) {
-  window.setTimeout(() => {
+  window.setTimeout(function() {
     for (let key in Object.assign({}, store)) {
       if (store[key] < seq) {
         delete store[key];
@@ -31,8 +31,10 @@ function clearStorage(seq) {
 
 export function thriftySync(source, target, options={}) {
   options.push = options.push || {};
-  let oldFilter = options.push.filter || (() => true);
-  options.push.filter = doc => oldFilter(doc) && filterPush(doc);
+  let oldFilter = options.push.filter || function() { return true; };
+  options.push.filter = function(doc) {
+    return oldFilter(doc) && filterPush(doc)
+  };
 
   let pullOptions = options.pull,
       pushOptions = options.push;
@@ -48,7 +50,7 @@ export function thriftySync(source, target, options={}) {
 
   let last_seq = 0;
 
-  pullHandle = pullHandle.on('change', change => {
+  pullHandle = pullHandle.on('change', function(change) {
     try {
       addDocsToStore(change.docs, last_seq);
     } catch(e) {
@@ -56,7 +58,7 @@ export function thriftySync(source, target, options={}) {
     }
   });
 
-  pushHandle = pushHandle.on('change', change => {
+  pushHandle = pushHandle.on('change', function(change) {
     try {
       last_seq = change.last_seq;
       clearStorage(last_seq);
