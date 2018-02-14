@@ -14,14 +14,14 @@ function filterPush(doc) {
 }
 
 function addDocsToStore(docs, seq) {
-  for (let doc of docs) {
+  for (var doc of docs) {
     store[docToKey(doc)] = seq;
   }
 }
 
 function clearStorage(seq) {
   window.setTimeout(function() {
-    for (let key in Object.assign({}, store)) {
+    for (var key in Object.assign({}, store)) {
       if (store[key] < seq) {
         delete store[key];
       }
@@ -31,12 +31,12 @@ function clearStorage(seq) {
 
 export function thriftySync(source, target, options={}) {
   options.push = options.push || {};
-  let oldFilter = options.push.filter || function() { return true; };
+  var oldFilter = options.push.filter || function() { return true; };
   options.push.filter = function(doc) {
     return oldFilter(doc) && filterPush(doc)
   };
 
-  let pullOptions = options.pull,
+  var pullOptions = options.pull,
       pushOptions = options.push;
 
   delete options.pull;
@@ -45,10 +45,10 @@ export function thriftySync(source, target, options={}) {
   pullOptions = Object.assign({}, pullOptions, options);
   pushOptions = Object.assign({}, pushOptions, options);
 
-  let pushHandle = PouchDB.replicate(source, target, pushOptions),
+  var pushHandle = PouchDB.replicate(source, target, pushOptions),
       pullHandle = PouchDB.replicate(target, source, pullOptions);
 
-  let last_seq = 0;
+  var last_seq = 0;
 
   pullHandle = pullHandle.on('change', function(change) {
     try {
