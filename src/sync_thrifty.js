@@ -29,7 +29,8 @@ function clearStorage(seq) {
   }, 2000);
 }
 
-export function thriftySync(source, target, options={}) {
+export function thriftySync(source, target, options) {
+  options = options || {};
   options.push = options.push || {};
   var oldFilter = options.push.filter || function() { return true; };
   options.push.filter = function(doc) {
