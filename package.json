@@ -19,7 +19,9 @@
     "url": "https://github.com/hermitdemschoenenleben/pouchdb-thrifty/issues"
   },
   "scripts": {},
-  "dependencies": {},
+  "dependencies": {
+    "events": "^3.0.0"
+  },
   "devDependencies": {
     "bluebird": "^3.4.0",
     "chai": "^3.5.0",
