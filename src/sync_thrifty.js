@@ -62,6 +62,11 @@ export function thriftySync(source, target, options) {
   pushHandle = pushHandle.on('change', function(change) {
     try {
       last_seq = change.last_seq;
+      if (typeof last_seq == 'string') {
+        // CSG sometimes uses sequences like 123:235. Just use parseInt to only
+        // use the first part.
+        last_seq = parseInt(last_seq);
+      }
       clearStorage(last_seq);
     } catch(e) {
       console.error(e);
