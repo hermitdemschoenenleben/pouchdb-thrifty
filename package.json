@@ -20,5 +20,8 @@
   },
   "scripts": {},
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "peerDependencies": {
+    "pouchdb": "^7.0.0-prerelease"
+  }
 }
